@@ -1,0 +1,21 @@
+
+> idealens@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 8.0s
+  Running TypeScript ...
+Failed to compile.
+
+./functions/supabase/[[path]].ts:1:25
+Type error: Cannot find name 'PagesFunction'.
+
+> 1 | export const onRequest: PagesFunction = async ({ request }) => {
+    |                         ^
+  2 |     const url = new URL(request.url);
+  3 |
+  4 |     // The real Supabase URL from your .env.local
+Next.js build worker exited with code: 1 and signal: null
