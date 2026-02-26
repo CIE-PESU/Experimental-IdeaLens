@@ -5,15 +5,15 @@ import { ReactNode } from "react";
 
 export function LogoBar() {
     return (
-        <div className="relative flex items-center px-8 py-8 bg-white border-b z-50 shadow-sm min-h-[110px]">
-            <div className="flex-1 flex items-center justify-start">
-                <Image src="/pes_v2.png" alt="PES" width={180} height={54} priority className="object-contain" />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 py-4">
+            <div className="flex-1 flex items-center justify-center md:justify-start">
+                <Image src="/pes_v2.png" alt="PES" width={180} height={54} priority className="object-contain h-14 w-auto" />
             </div>
             <div className="flex items-center justify-center">
-                <Image src="/idealens.png" alt="IdeaLens" width={240} height={60} className="object-contain" />
+                <Image src="/idealens.png" alt="IdeaLens" width={240} height={60} className="object-contain h-14 w-auto" />
             </div>
-            <div className="flex-1 flex items-center justify-end">
-                <Image src="/cie.png" alt="CIE" width={260} height={78} priority className="object-contain" />
+            <div className="flex-1 flex items-center justify-center md:justify-end">
+                <Image src="/cie.png" alt="CIE" width={260} height={78} priority className="object-contain h-16 w-auto" />
             </div>
         </div>
     );

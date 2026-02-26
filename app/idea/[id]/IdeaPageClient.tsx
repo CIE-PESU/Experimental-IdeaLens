@@ -38,7 +38,6 @@ type ResultRow = {
     execution_readiness_signal: string | null;
     transaction_details: any | null;
     created_at: string;
-    _source?: string; // For debugging
     market_readiness?: number | string | null;
     execution_risk?: number | string | null;
 };
@@ -117,19 +116,7 @@ export default function IdeaPageClient() {
     const [result, setResult] = useState<ResultRow | null>(null);
     const [juryScores, setJuryScores] = useState<JuryScoreRow[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const [discoveryData, setDiscoveryData] = useState<any[]>([]);
-    const [debugInfo, setDebugInfo] = useState<any>(null);
-
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            setDebugInfo({
-                path: window.location.pathname,
-                params: params,
-                ideaId: ideaId,
-                timestamp: new Date().toISOString()
-            });
-        }
-    }, [ideaId, params]);
+    const [missingTableError, setMissingTableError] = useState(false);
 
     const [jury, setJury] = useState({
         desirability: "",
@@ -139,8 +126,8 @@ export default function IdeaPageClient() {
     });
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+
     const [aiRevealed, setAiRevealed] = useState(false);
-    const [missingTableError, setMissingTableError] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<{ team_id: string, team_name: string }[]>([]);
@@ -234,8 +221,6 @@ export default function IdeaPageClient() {
     }, [ideaId]);
 
     const refreshData = async (teamData: TeamRow, actualId: string) => {
-        setDiscoveryData([]); // Reset
-
         const tables = [
             { name: "ai_evaluations", cols: ["team_name", "team_id"], sort: "evaluated_at" },
             { name: "human_evaluations", cols: ["team_name", "idea_id"], sort: null },
@@ -243,17 +228,12 @@ export default function IdeaPageClient() {
             { name: "idea_submissions", cols: ["team_name", "team_id"], sort: null }
         ];
 
-        // Removed idea_results as it consistently fails schema check
-
         let finalResult: any = null;
-        let logs: any[] = [];
 
         for (const table of tables) {
             for (const col of table.cols) {
                 try {
                     let query = supabase.from(table.name).select("*");
-
-                    // Match by name or ID depending on column type/intent
                     const value = (col.includes("name") || col === "team") ? teamData.team_name : actualId;
 
                     if (col.includes("name") || col === "team") {
@@ -269,25 +249,17 @@ export default function IdeaPageClient() {
                     const { data, error } = await query.limit(1).maybeSingle();
 
                     if (data) {
-                        const entry = { table: table.name, column: col, found: true, data };
-                        logs.push(entry);
                         if (!finalResult) {
-                            finalResult = { ...data, _source: `${table.name} (${col})` };
+                            finalResult = { ...data };
                         }
-                    } else if (error) {
-                        logs.push({ table: table.name, column: col, error: error.message });
-                    } else {
-                        logs.push({ table: table.name, column: col, found: false });
                     }
                 } catch (e: any) {
-                    logs.push({ table: table.name, column: col, exception: e.message });
+                    // Ignore
                 }
             }
         }
 
-        setDiscoveryData(logs);
         setResult(finalResult as ResultRow | null);
-        console.log("Super Search Discovery Map:", logs);
 
         if (teamData?.team_name) {
             await fetchJuryScores(teamData.team_name, actualId, finalResult !== null);
@@ -438,9 +410,8 @@ export default function IdeaPageClient() {
 
     return (
         <div className="min-h-screen bg-zinc-50 font-sans pb-20">
-            <LogoBar />
-
             <div className="max-w-6xl mx-auto p-6 md:p-8">
+                <LogoBar />
                 {missingTableError && (
                     <div className="mb-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-yellow-800 shadow-sm flex items-start gap-3">
                         <span className="text-2xl">⚠️</span>
@@ -466,15 +437,7 @@ export default function IdeaPageClient() {
                             ID: <span className="font-mono bg-zinc-100 px-2 py-1 rounded">{ideaId || "Empty"}</span>
                         </div>
 
-                        {/* DEBUG UI */}
-                        <div className="mt-8 pt-8 border-t border-zinc-100 text-left">
-                            <details className="text-[10px] text-zinc-400 cursor-pointer">
-                                <summary>Network/Route Debug Info</summary>
-                                <pre className="mt-2 p-2 bg-zinc-50 rounded overflow-auto">
-                                    {JSON.stringify(debugInfo, null, 2)}
-                                </pre>
-                            </details>
-                        </div>
+
                     </div>
                 ) : (
                     <div className="space-y-8">
@@ -669,41 +632,6 @@ export default function IdeaPageClient() {
                                 )}
                             </div>
 
-                            {/* HIDDEN DATA INSPECTOR */}
-                            <div className="mt-8 pt-8 border-t border-zinc-100">
-                                <details className="group">
-                                    <summary className="text-[10px] text-zinc-400 cursor-pointer hover:text-zinc-600 transition-colors uppercase font-bold tracking-widest list-none flex items-center gap-2">
-                                        <span className="group-open:rotate-90 transition-transform inline-block">▶</span>
-                                        Debug Data Inspector (Expand if N/A appears)
-                                    </summary>
-                                    <div className="mt-4 p-4 bg-zinc-900 rounded-xl overflow-auto border border-zinc-800 shadow-inner">
-                                        <h5 className="text-[10px] text-emerald-500 mb-2 font-mono uppercase tracking-widest font-bold">Search Discovery Map:</h5>
-                                        <div className="mb-4 space-y-2">
-                                            {discoveryData.map((log, i) => (
-                                                <div key={i} className="text-[10px] font-mono flex gap-2">
-                                                    <span className="text-zinc-500">[{log.table}.{log.column}]</span>
-                                                    {log.found ? (
-                                                        <span className="text-emerald-400 font-bold">MATCH FOUND!</span>
-                                                    ) : log.error ? (
-                                                        <span className="text-red-400">Error: {log.error}</span>
-                                                    ) : (
-                                                        <span className="text-zinc-700">No match</span>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <h5 className="text-[10px] text-zinc-500 mb-2 font-mono">SUPABASE_RESULT_OBJECT:</h5>
-                                        <pre className="text-[11px] text-indigo-400 font-mono leading-relaxed">
-                                            {JSON.stringify({
-                                                hasResult: !!result,
-                                                source: (result as any)?._source || "None",
-                                                scores: aiScores10,
-                                                rawData: result
-                                            }, null, 2)}
-                                        </pre>
-                                    </div>
-                                </details>
-                            </div>
 
                             {submitted && (
                                 <div className="mt-6 p-4 bg-green-50 text-green-800 rounded-xl border border-green-200 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
