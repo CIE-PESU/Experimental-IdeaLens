@@ -122,26 +122,6 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-100 shadow-inner">
-            <button
-              onClick={() => setViewMode('detailed')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all text-[11px] font-black uppercase tracking-widest ${viewMode === 'detailed' ? 'bg-white shadow-md text-brand-blue border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              Detailed
-            </button>
-            <button
-              onClick={() => setViewMode('compact')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all text-[11px] font-black uppercase tracking-widest ${viewMode === 'compact' ? 'bg-white shadow-md text-brand-blue border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              Compact
-            </button>
-            <button
-              onClick={() => setViewMode('comparative')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all text-[11px] font-black uppercase tracking-widest ${viewMode === 'comparative' ? 'bg-white shadow-md text-brand-blue border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              Comparative
-            </button>
-          </div>
         </section>
 
         {loading ? (
