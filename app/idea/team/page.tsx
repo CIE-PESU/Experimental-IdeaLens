@@ -98,6 +98,8 @@ function TeamDetailsContent() {
                     .from("human_evaluations")
                     .select("*")
                     .eq("idea_id", id)
+                    .order('evaluated_at', { ascending: false })
+                    .limit(1)
                     .maybeSingle();
 
                 if (hData) {
@@ -256,9 +258,15 @@ function TeamDetailsContent() {
 
                 {/* --- EVALUATION SECTION (Now under Team Identity) --- */}
                 <section className="space-y-12 mb-24">
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-6 relative">
                         <div className="h-12 w-2 bg-slate-900 rounded-full"></div>
                         <h2 className="text-4xl font-black uppercase italic tracking-tight text-slate-900">JURY SCORE BOARD</h2>
+                        {jurySubmitted && (
+                            <div className="absolute -top-6 left-10 bg-emerald-100 text-emerald-700 font-black text-[10px] px-3 py-1 rounded-md uppercase tracking-widest flex items-center gap-1.5 shadow-sm border border-emerald-200">
+                                <CheckCircle2 size={12} />
+                                Evaluated
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
