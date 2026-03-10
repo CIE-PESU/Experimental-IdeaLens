@@ -394,13 +394,13 @@ function TeamDetailsContent() {
                                         if (!value) return null;
 
                                         return (
-                                            <div key={key} className="border border-slate-100 rounded-2xl bg-white shadow-sm h-fit">
+                                            <div key={key} className="border border-slate-100 rounded-2xl bg-white shadow-sm h-full flex flex-col">
                                                 <div className="px-8 py-6 flex items-center justify-between">
                                                     <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-800">
                                                         {formatLabel(key)}
                                                     </span>
                                                 </div>
-                                                <div className="px-8 pb-8 pt-0 text-base leading-relaxed text-slate-700 bg-white rounded-b-2xl border-t border-transparent whitespace-pre-wrap font-medium">
+                                                <div className="px-8 pb-8 pt-0 text-base leading-relaxed text-slate-700 bg-white rounded-b-2xl border-t border-transparent whitespace-pre-wrap font-medium flex-1">
                                                     {renderValue(value)}
                                                 </div>
                                             </div>
