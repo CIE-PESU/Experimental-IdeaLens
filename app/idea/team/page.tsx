@@ -271,102 +271,83 @@ function TeamDetailsContent() {
                         <h2 className="text-4xl font-black uppercase italic tracking-tight text-slate-900">JURY SCORE BOARD</h2>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                        {/* Separate Metric Cards (White & Interactive) */}
-                        <div className="lg:col-span-2 space-y-10">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                {[
-                                    { label: "Desirability", key: "d" as const, aiKey: "desirability_score", icon: <Heart size={20} className="text-amber-400" />, color: "border-amber-100/50" },
-                                    { label: "Feasibility", key: "f" as const, aiKey: "feasibility_score", icon: <Hammer size={20} className="text-emerald-400" />, color: "border-emerald-100/50" },
-                                    { label: "Viability", key: "v" as const, aiKey: "viability_score", icon: <TrendingUp size={20} className="text-indigo-400" />, color: "border-indigo-100/50" },
-                                ].map((field) => (
-                                    <div key={field.key} className={`bg-white p-8 rounded-[2.5rem] border ${field.color} shadow-sm space-y-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group`}>
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-2">
-                                                {field.icon}
-                                                {field.label}
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1">
-                                                <span className="text-3xl font-black italic text-slate-900 group-hover:scale-110 transition-transform leading-none">{juryScores[field.key]}</span>
-                                                {jurySubmitted && aiEval?.[field.aiKey] && (
-                                                    <span className="text-[10px] font-black text-brand-accent tracking-[0.1em] uppercase flex items-center gap-1.5 bg-brand-accent/10 px-2.5 py-1 rounded-md">
-                                                        <Sparkles size={10} /> <span className="opacity-70 font-bold">AI:</span> <span className="text-xs">{aiEval[field.aiKey]}</span>
-                                                    </span>
-                                                )}
-                                            </div>
+                    <div className="space-y-10">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-stretch">
+                            {/* Separate Metric Cards (White & Interactive) */}
+                            {[
+                                { label: "Desirability", key: "d" as const, aiKey: "desirability_score", icon: <Heart size={20} className="text-amber-400" />, color: "border-amber-100/50" },
+                                { label: "Feasibility", key: "f" as const, aiKey: "feasibility_score", icon: <Hammer size={20} className="text-emerald-400" />, color: "border-emerald-100/50" },
+                                { label: "Viability", key: "v" as const, aiKey: "viability_score", icon: <TrendingUp size={20} className="text-indigo-400" />, color: "border-indigo-100/50" },
+                            ].map((field) => (
+                                <div key={field.key} className={`bg-white p-8 rounded-[2.5rem] border ${field.color} shadow-sm space-y-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group`}>
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-2">
+                                            {field.icon}
+                                            {field.label}
                                         </div>
-                                        <div className="relative pt-2">
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max="10"
-                                                step="0.5"
-                                                disabled={jurySubmitted}
-                                                value={juryScores[field.key]}
-                                                onChange={(e) => setJuryScores({ ...juryScores, [field.key]: parseFloat(e.target.value) })}
-                                                className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-slate-900 disabled:opacity-30 disabled:cursor-not-allowed"
-                                            />
-                                            <div className="flex justify-between mt-2 px-1">
-                                                <span className="text-[9px] font-bold text-slate-200">0</span>
-                                                <span className="text-[9px] font-bold text-slate-200">10</span>
-                                            </div>
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className="text-3xl font-black italic text-slate-900 group-hover:scale-110 transition-transform leading-none">{juryScores[field.key]}</span>
+                                            {jurySubmitted && aiEval?.[field.aiKey] && (
+                                                <span className="text-[10px] font-black text-brand-accent tracking-[0.1em] uppercase flex items-center gap-1.5 bg-brand-accent/10 px-2.5 py-1 rounded-md">
+                                                    <Sparkles size={10} /> <span className="opacity-70 font-bold">AI:</span> <span className="text-xs">{aiEval[field.aiKey]}</span>
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-
-                            {!jurySubmitted ? (
-                                <button
-                                    onClick={handleJurySubmit}
-                                    disabled={submittingJury}
-                                    className="w-fit px-12 mx-auto py-7 rounded-[2rem] bg-slate-900 text-white font-black text-sm uppercase italic tracking-[0.4em] shadow-2xl hover:bg-brand-blue transition-all flex items-center justify-center gap-4 active:scale-[0.98] disabled:opacity-50 group"
-                                >
-                                    {submittingJury ? "Submitting..." : "Submit"}
-                                </button>
-                            ) : (
-                                <div className="w-full py-7 rounded-[2rem] bg-emerald-50 border border-emerald-100 text-emerald-600 font-black text-sm uppercase italic tracking-[0.4em] flex items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4">
-                                    <CheckCircle2 size={24} /> Official Verdict Registered ✅
+                                    <div className="relative pt-2">
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="10"
+                                            step="0.5"
+                                            disabled={jurySubmitted}
+                                            value={juryScores[field.key]}
+                                            onChange={(e) => setJuryScores({ ...juryScores, [field.key]: parseFloat(e.target.value) })}
+                                            className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-slate-900 disabled:opacity-30 disabled:cursor-not-allowed"
+                                        />
+                                        <div className="flex justify-between mt-2 px-1">
+                                            <span className="text-[9px] font-bold text-slate-200">0</span>
+                                            <span className="text-[9px] font-bold text-slate-200">10</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+                            ))}
 
-                        {/* AI Comparison */}
-                        <div className="flex flex-col h-full">
-                            <div className="flex-1 bg-white p-8 rounded-[2.5rem] border border-brand-accent/20 shadow-sm flex flex-col relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                            {/* AI Comparison */}
+                            <div className="bg-white p-8 rounded-[2.5rem] border border-brand-accent/20 shadow-sm flex flex-col relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                                 <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-
                                 {!jurySubmitted ? (
                                     <div className="space-y-6 relative z-10 flex flex-col items-center justify-center h-full">
                                         <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center border-4 border-dashed border-slate-100 relative">
                                             <AlertTriangle size={32} className="text-slate-200" />
                                             <div className="absolute inset-0 rounded-full border-4 border-slate-100 animate-ping opacity-20"></div>
                                         </div>
-                                        <h3 className="text-xs font-black uppercase tracking-[0.6em] text-slate-300">Analysis Encrypted</h3>
+                                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 text-center">Analysis Encrypted</h3>
                                     </div>
                                 ) : (
                                     <div className="w-full h-full flex flex-col justify-between animate-premium relative z-10">
                                         <div className="flex justify-between items-start">
-                                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-accent">
+                                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-accent mt-2">
                                                 <Sparkles size={20} className="text-brand-accent" />
                                                 AI SCORE
                                             </div>
-                                            <span className="text-5xl font-black italic text-slate-900 group-hover:scale-110 transition-transform origin-top-right">{aiAvg || "N/A"}</span>
+                                            <span className="text-3xl font-black italic text-slate-900 group-hover:scale-110 transition-transform origin-top-right leading-none">{aiAvg || "N/A"}</span>
                                         </div>
 
                                         {aiAvg && (
                                             <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col gap-4">
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Score Variance</span>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-2xl">{getEmoji(Number(scoreDelta))}</span>
-                                                        <span className={`text-4xl font-black italic transition-all group-hover:scale-110 origin-right ${Number(scoreDelta) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xl">{getEmoji(Number(scoreDelta))}</span>
+                                                        <span className="text-2xl font-black italic transition-all group-hover:scale-110 origin-right text-slate-900">
                                                             {Math.abs(Number(scoreDelta)).toFixed(2)}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div className="text-[9px] text-slate-400 font-bold bg-slate-50/50 p-4 rounded-2xl border border-slate-100 text-center leading-relaxed">
                                                     AI Avg: <span className="text-slate-900">{aiAvg}</span> | Jury Avg: <span className="text-slate-900">{juryAvg}</span><br />
-                                                    Final Difference: <span className={Number(scoreDelta) >= 0 ? "text-emerald-600" : "text-rose-600"}>{Math.abs(Number(scoreDelta)).toFixed(2)}</span>
+                                                    Final Difference: <span className="text-slate-900">{Math.abs(Number(scoreDelta)).toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -374,6 +355,20 @@ function TeamDetailsContent() {
                                 )}
                             </div>
                         </div>
+
+                        {!jurySubmitted ? (
+                            <button
+                                onClick={handleJurySubmit}
+                                disabled={submittingJury}
+                                className="w-fit px-12 mx-auto py-7 rounded-[2rem] bg-slate-900 text-white font-black text-sm uppercase italic tracking-[0.4em] shadow-2xl hover:bg-brand-blue transition-all flex items-center justify-center gap-4 active:scale-[0.98] disabled:opacity-50 group"
+                            >
+                                {submittingJury ? "Submitting..." : "Submit"}
+                            </button>
+                        ) : (
+                            <div className="w-full py-7 rounded-[2rem] bg-emerald-50 border border-emerald-100 text-emerald-600 font-black text-sm uppercase italic tracking-[0.4em] flex items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4">
+                                <CheckCircle2 size={24} /> Official Verdict Registered ✅
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -397,19 +392,16 @@ function TeamDetailsContent() {
                                         if (!value) return null;
 
                                         return (
-                                            <details key={key} className="group/item border border-slate-100 rounded-2xl bg-white shadow-sm hover:shadow-md transition-all h-fit">
-                                                <summary className="cursor-pointer px-8 py-6 flex items-center justify-between transition-colors select-none group-open/item:bg-slate-50 group-open/item:rounded-t-2xl">
+                                            <div key={key} className="border border-slate-100 rounded-2xl bg-white shadow-sm h-fit">
+                                                <div className="px-8 py-6 flex items-center justify-between">
                                                     <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-800">
                                                         {formatLabel(key)}
                                                     </span>
-                                                    <span className="transition-transform duration-300 group-open/item:-rotate-180 text-slate-400">
-                                                        <ChevronDown size={20} />
-                                                    </span>
-                                                </summary>
-                                                <div className="px-8 pb-8 pt-4 text-base leading-relaxed text-slate-700 bg-white group-open/item:rounded-b-2xl border-t border-slate-50 whitespace-pre-wrap font-medium">
+                                                </div>
+                                                <div className="px-8 pb-8 pt-0 text-base leading-relaxed text-slate-700 bg-white rounded-b-2xl border-t border-transparent whitespace-pre-wrap font-medium">
                                                     {renderValue(value)}
                                                 </div>
-                                            </details>
+                                            </div>
                                         );
                                     })}
                                 </div>
