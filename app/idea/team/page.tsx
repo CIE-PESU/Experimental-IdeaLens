@@ -244,9 +244,17 @@ function TeamDetailsContent() {
                     <div className="flex items-center gap-6">
                         <div className="h-16 w-2 bg-brand-accent rounded-full shadow-lg shadow-brand-accent/20"></div>
                         <div className="space-y-2">
-                            <h1 className="text-7xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">
-                                {submission.team_name}
-                            </h1>
+                            <div className="flex items-baseline gap-6">
+                                <h1 className="text-7xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">
+                                    {submission.team_name}
+                                </h1>
+                                {jurySubmitted && (
+                                    <div className="bg-emerald-50 text-emerald-600 font-black text-[10px] px-3 py-1.5 rounded-lg uppercase tracking-widest flex items-center gap-1.5 shadow-sm border border-emerald-100">
+                                        <CheckCircle2 size={12} />
+                                        Evaluated
+                                    </div>
+                                )}
+                            </div>
                             {submission.project_title && submission.project_title !== submission.team_name && (
                                 <p className="text-xl font-bold text-slate-400 uppercase italic tracking-tight opacity-80">
                                     {submission.project_title}
@@ -258,15 +266,9 @@ function TeamDetailsContent() {
 
                 {/* --- EVALUATION SECTION (Now under Team Identity) --- */}
                 <section className="space-y-12 mb-24">
-                    <div className="flex items-center gap-6 relative">
+                    <div className="flex items-center gap-6">
                         <div className="h-12 w-2 bg-slate-900 rounded-full"></div>
                         <h2 className="text-4xl font-black uppercase italic tracking-tight text-slate-900">JURY SCORE BOARD</h2>
-                        {jurySubmitted && (
-                            <div className="absolute -top-6 left-10 bg-emerald-100 text-emerald-700 font-black text-[10px] px-3 py-1 rounded-md uppercase tracking-widest flex items-center gap-1.5 shadow-sm border border-emerald-200">
-                                <CheckCircle2 size={12} />
-                                Evaluated
-                            </div>
-                        )}
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
