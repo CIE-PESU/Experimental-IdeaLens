@@ -180,6 +180,14 @@ function TeamDetailsContent() {
     const aiAvg = aiEval ? Number(aiEval.average_dfv_score).toFixed(2) : null;
     const scoreDelta = aiAvg ? (Number(juryAvg) - Number(aiAvg)).toFixed(2) : null;
 
+    const getEmoji = (delta: number) => {
+        if (delta > 1) return "🤩";
+        if (delta > 0) return "😄";
+        if (delta > -0.5) return "🧐";
+        if (delta > -1.5) return "🤨";
+        return "😵‍💫";
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-50 font-sans">
@@ -331,13 +339,17 @@ function TeamDetailsContent() {
                                         {aiAvg && (
                                             <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col gap-4">
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Intelligence Variance</span>
-                                                    <span className={`text-4xl font-black italic transition-all group-hover:scale-110 origin-right ${Number(scoreDelta) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                        {Number(scoreDelta) >= 0 ? '+' : ''}{scoreDelta}
-                                                    </span>
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Score Variance</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-2xl">{getEmoji(Number(scoreDelta))}</span>
+                                                        <span className={`text-4xl font-black italic transition-all group-hover:scale-110 origin-right ${Number(scoreDelta) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                            {Math.abs(Number(scoreDelta)).toFixed(2)}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div className="text-[10px] text-slate-500 font-bold bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
-                                                    Variance = Jury Avg - AI Avg
+                                                <div className="text-[9px] text-slate-400 font-bold bg-slate-50/50 p-4 rounded-2xl border border-slate-100 text-center leading-relaxed">
+                                                    AI Avg: <span className="text-slate-900">{aiAvg}</span> | Jury Avg: <span className="text-slate-900">{juryAvg}</span><br />
+                                                    Final Difference: <span className={Number(scoreDelta) >= 0 ? "text-emerald-600" : "text-rose-600"}>{Math.abs(Number(scoreDelta)).toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -347,6 +359,47 @@ function TeamDetailsContent() {
                         </div>
                     </div>
                 </section>
+
+                {/* --- SIGNALS (Collapsible) --- */}
+                {(aiEval?.market_context_signal || aiEval?.execution_readiness_signal || submission?.market_context_signal || submission?.execution_readiness_signal) && (
+                    <section className="mb-24 pt-12 border-t border-slate-200">
+                        <details className="group bg-white border border-slate-100 rounded-[3rem] shadow-sm overflow-hidden hover:shadow-md transition-all duration-500">
+                            <summary className="cursor-pointer p-10 flex items-center justify-between text-4xl font-black uppercase italic tracking-tight text-slate-900 border-b border-transparent group-open:border-slate-100 group-open:bg-slate-50/50 transition-colors select-none">
+                                <span className="flex items-center gap-6">
+                                    <div className="h-12 w-2 bg-brand-accent rounded-full"></div>
+                                    SIGNALS
+                                </span>
+                                <span className="transition-transform duration-300 group-open:-rotate-180 text-slate-400">
+                                    <ChevronDown size={40} />
+                                </span>
+                            </summary>
+                            <div className="p-16">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                    {['market_context_signal', 'execution_readiness_signal'].map((key) => {
+                                        const value = aiEval?.[key] || submission?.[key];
+                                        if (!value) return null;
+
+                                        return (
+                                            <details key={key} className="group/item border border-slate-100 rounded-2xl bg-white shadow-sm hover:shadow-md transition-all h-fit">
+                                                <summary className="cursor-pointer px-8 py-6 flex items-center justify-between transition-colors select-none group-open/item:bg-slate-50 group-open/item:rounded-t-2xl">
+                                                    <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-800">
+                                                        {formatLabel(key)}
+                                                    </span>
+                                                    <span className="transition-transform duration-300 group-open/item:-rotate-180 text-slate-400">
+                                                        <ChevronDown size={20} />
+                                                    </span>
+                                                </summary>
+                                                <div className="px-8 pb-8 pt-4 text-base leading-relaxed text-slate-700 bg-white group-open/item:rounded-b-2xl border-t border-slate-50 whitespace-pre-wrap font-medium">
+                                                    {renderValue(value)}
+                                                </div>
+                                            </details>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </details>
+                    </section>
+                )}
 
                 {/* --- SUBMISSION DATA (Team Details, Collapsible) --- */}
                 <section className="mb-24 pt-12 border-t border-slate-200">
