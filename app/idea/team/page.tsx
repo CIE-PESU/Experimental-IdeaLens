@@ -276,17 +276,24 @@ function TeamDetailsContent() {
                         <div className="lg:col-span-2 space-y-10">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                                 {[
-                                    { label: "Desirability", key: "d" as const, icon: <Heart size={20} className="text-amber-400" />, color: "border-amber-100/50" },
-                                    { label: "Feasibility", key: "f" as const, icon: <Hammer size={20} className="text-emerald-400" />, color: "border-emerald-100/50" },
-                                    { label: "Viability", key: "v" as const, icon: <TrendingUp size={20} className="text-indigo-400" />, color: "border-indigo-100/50" },
+                                    { label: "Desirability", key: "d" as const, aiKey: "desirability_score", icon: <Heart size={20} className="text-amber-400" />, color: "border-amber-100/50" },
+                                    { label: "Feasibility", key: "f" as const, aiKey: "feasibility_score", icon: <Hammer size={20} className="text-emerald-400" />, color: "border-emerald-100/50" },
+                                    { label: "Viability", key: "v" as const, aiKey: "viability_score", icon: <TrendingUp size={20} className="text-indigo-400" />, color: "border-indigo-100/50" },
                                 ].map((field) => (
                                     <div key={field.key} className={`bg-white p-8 rounded-[2.5rem] border ${field.color} shadow-sm space-y-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group`}>
-                                        <div className="flex justify-between items-center">
-                                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-2">
                                                 {field.icon}
                                                 {field.label}
                                             </div>
-                                            <span className="text-3xl font-black italic text-slate-900 group-hover:scale-110 transition-transform">{juryScores[field.key]}</span>
+                                            <div className="flex flex-col items-end gap-1">
+                                                <span className="text-3xl font-black italic text-slate-900 group-hover:scale-110 transition-transform leading-none">{juryScores[field.key]}</span>
+                                                {jurySubmitted && aiEval?.[field.aiKey] && (
+                                                    <span className="text-[10px] font-black text-brand-accent tracking-[0.1em] uppercase flex items-center gap-1.5 bg-brand-accent/10 px-2.5 py-1 rounded-md">
+                                                        <Sparkles size={10} /> <span className="opacity-70 font-bold">AI:</span> <span className="text-xs">{aiEval[field.aiKey]}</span>
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="relative pt-2">
                                             <input
