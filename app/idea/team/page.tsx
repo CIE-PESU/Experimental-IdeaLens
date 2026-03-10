@@ -226,7 +226,7 @@ function TeamDetailsContent() {
         <div className="relative min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-brand-accent/30 selection:text-white">
             <LogosHeader />
 
-            <main className="w-full px-12 mt-0 pb-20">
+            <main className="w-full px-12 mt-0 pb-20" style={{ zoom: 0.9 }}>
                 {/* Modern Navigation Header */}
                 <div className="flex items-center justify-between mb-12 pb-6 border-b border-slate-100">
                     <button
