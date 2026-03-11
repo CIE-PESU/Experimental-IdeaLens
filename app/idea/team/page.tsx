@@ -237,15 +237,15 @@ function TeamDetailsContent() {
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         Back
                     </button>
-                    <img src="/pes_v2.png" alt="PES" className="h-10 md:h-14 w-auto object-contain" />
+                    <img src="/pes_v2.png" alt="PES" className="h-20 md:h-28 w-auto object-contain" />
                 </div>
                 
                 <div className="w-1/3 flex border-x border-transparent justify-center">
-                    <img src="/idealens.png" alt="IdeaLens" className="h-16 md:h-24 w-auto object-contain scale-[1.2] origin-center" />
+                    <img src="/idealens.png" alt="IdeaLens" className="h-32 md:h-48 w-auto object-contain scale-[1.2] origin-center" />
                 </div>
                 
                 <div className="w-1/3 flex justify-end">
-                    <img src="/cie.png" alt="CIE" className="h-10 md:h-12 w-auto object-contain" />
+                    <img src="/cie.png" alt="CIE" className="h-20 md:h-28 w-auto object-contain" />
                 </div>
             </header>
 

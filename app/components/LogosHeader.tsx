@@ -26,7 +26,7 @@ export default function LogosHeader() {
                         alt="IdeaLens"
                         width={700}
                         height={260}
-                        className="h-20 md:h-24 lg:h-32 w-auto object-contain drop-shadow-md"
+                        className="h-36 md:h-48 lg:h-64 w-auto object-contain drop-shadow-md"
                         priority
                     />
                 </div>
@@ -38,7 +38,7 @@ export default function LogosHeader() {
                         alt="CIE"
                         width={800}
                         height={300}
-                        className="h-16 md:h-20 lg:h-28 w-auto object-contain"
+                        className="h-28 md:h-36 lg:h-48 w-auto object-contain"
                         priority
                     />
                 </div>
