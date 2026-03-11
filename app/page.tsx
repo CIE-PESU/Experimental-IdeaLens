@@ -94,16 +94,16 @@ export default function Home() {
       <main className="w-full px-12 mt-0 pb-10">
 
         {/* SEARCH BAR (OUTSIDE HEADER) */}
-        <div className="flex justify-center mb-10">
-          <div className="relative w-full max-w-lg group">
+        <div className="flex justify-center mb-6">
+          <div className="relative w-full max-w-md group">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search team name"
-              className="w-full bg-white rounded-2xl border border-slate-200 px-6 py-3.5 text-base shadow-sm group-hover:shadow-md focus:ring-4 focus:ring-brand-accent/10 focus:border-brand-accent/30 outline-none transition-all placeholder:text-slate-300 font-medium italic"
+              className="w-full bg-white rounded-2xl border border-slate-200 px-5 py-3 text-sm shadow-sm group-hover:shadow-md focus:ring-4 focus:ring-brand-accent/10 focus:border-brand-accent/30 outline-none transition-all placeholder:text-slate-300 font-medium italic"
             />
-            <Search className="absolute right-6 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-hover:text-brand-accent transition-colors" />
+            <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-hover:text-brand-accent transition-colors" />
           </div>
         </div>
 
@@ -124,37 +124,39 @@ export default function Home() {
             No intelligence matches found for your current filter parameters.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {processedTeams.map((team) => (
               <Link
                 key={team.id}
                 href={`/idea/team?id=${encodeURIComponent(team.id)}`}
-                className="group bg-white rounded-[32px] border border-slate-100 p-10 shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all flex flex-col items-center text-center gap-8 relative overflow-hidden"
+                className="group bg-white rounded-[24px] border border-slate-100 p-5 shadow-sm hover:shadow-xl hover:scale-[1.03] transition-all flex flex-col items-center text-center gap-4 relative overflow-hidden"
               >
                 {/* Visual Accent */}
-                <div className="absolute top-0 left-0 w-full h-2 bg-brand-accent/5 group-hover:bg-brand-accent transition-colors"></div>
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-brand-accent/5 group-hover:bg-brand-accent transition-colors"></div>
 
                 {/* Logo Section */}
-                <div className="flex-shrink-0 w-24 h-24 rounded-3xl bg-slate-900 flex items-center justify-center overflow-hidden relative shadow-xl group-hover:rotate-3 transition-transform">
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:12px_12px]"></div>
-                  <span className="text-4xl font-black text-white uppercase italic">
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-slate-900 flex items-center justify-center overflow-hidden relative shadow-lg group-hover:rotate-3 transition-transform">
+                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:10px_10px]"></div>
+                  <span className="text-2xl font-black text-white uppercase italic">
                     {(team.team_name || "U").charAt(0)}
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center gap-3">
-                  <h3 className="text-2xl font-black text-slate-900 uppercase italic group-hover:text-brand-accent transition-colors tracking-tight leading-tight">
+                <div className="flex flex-col items-center gap-1">
+                  <h3 className="text-[13px] font-black text-slate-900 uppercase italic group-hover:text-brand-accent transition-colors tracking-tight leading-snug">
                     {team.team_name || "Untitled"}
                   </h3>
                   {team.submitted_at && (
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest italic opacity-60">
-                      Intelligence Node #{team.id.slice(0, 4)}
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic opacity-40">
+                      ID: {team.id.slice(0, 4)}
                     </span>
                   )}
                 </div>
 
-                <div className="mt-4 w-full pt-8 border-t border-slate-50 flex items-center justify-center gap-3 text-brand-accent font-black text-xs uppercase tracking-[0.25em] opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
-                  Dive into idea <ChevronRight size={16} strokeWidth={3} />
+                <div className="w-full h-px bg-slate-50"></div>
+                
+                <div className="flex items-center justify-center gap-2 text-brand-accent font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                  DIVE <ChevronRight size={12} strokeWidth={4} />
                 </div>
               </Link>
             ))}
