@@ -358,21 +358,21 @@ function TeamDetailsContent() {
                     {/* ========================================================= */}
                     <div className="xl:col-span-3 flex flex-col gap-6 h-fit self-start xl:sticky xl:top-6">
                         
-                        {/* --- JURY SCORE BOARD --- */}
-                        <div className="bg-white/85 backdrop-blur-[12px] rounded-[20px] p-5 shadow-[0_4px_24px_rgba(0,0,0,0.08)] text-slate-900" style={{ border: '1px solid rgba(0,0,0,0.05)' }}>
-                            <h2 className="text-[#0F1E2E] text-2xl font-bold mb-6">Jury Scoring Board</h2>
+                        {/* --- JURY SCORE BOARD (No Outer Container) --- */}
+                        <div className="flex flex-col gap-4">
+                            <h2 className="text-[#0F1E2E] text-2xl font-bold px-2">Jury Scoring Board</h2>
                             
-                            {/* DYNAMIC DFV GRID */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-3 min-[1800px]:grid-cols-3">
+                            {/* DYNAMIC DFV GRID - All in one row */}
+                            <div className="flex flex-row gap-3 w-full overflow-x-auto pb-2">
                                 {[
                                     { label: "DESIRABILITY", key: "d" as const, aiKey: "desirability_score", icon: "🖤", isManual: false },
                                     { label: "FEASIBILITY", key: "f" as const, aiKey: "feasibility_score", icon: "🛠️", isManual: false },
                                     { label: "VIABILITY", key: "v" as const, aiKey: "viability_score", icon: "💰", isManual: false },
                                 ].map((field) => (
-                                    <div key={field.key} className="bg-white rounded-[16px] border border-slate-100 shadow-sm p-4 flex flex-col gap-3 transition-transform hover:-translate-y-0.5">
-                                        <div className="flex justify-between items-center text-[11px] font-black text-[#0F1E2E] uppercase tracking-widest leading-none">
+                                    <div key={field.key} className="bg-white rounded-[16px] border border-slate-100 shadow-sm p-4 flex flex-col gap-3 transition-transform hover:-translate-y-0.5 min-w-[140px] flex-1">
+                                        <div className="flex justify-between items-center text-[10px] font-black text-[#0F1E2E] uppercase tracking-widest leading-none">
                                             {field.label}
-                                            <span className="text-base">{field.icon}</span>
+                                            <span className="text-sm">{field.icon}</span>
                                         </div>
                                         
                                         <div className="flex flex-col items-center justify-center pt-1 pb-2">
@@ -389,14 +389,14 @@ function TeamDetailsContent() {
                                         </div>
 
                                         <div className="border-t border-dashed border-slate-200 pt-2.5 flex items-center justify-between">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">AI Score</span>
-                                            <span className="text-sm font-black text-[#0F1E2E]">{jurySubmitted && field.aiKey && aiEval?.[field.aiKey as string] ? aiEval[field.aiKey as string] : "—"}</span>
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">AI Score</span>
+                                            <span className="text-xs font-black text-[#0F1E2E]">{jurySubmitted && field.aiKey && aiEval?.[field.aiKey as string] ? aiEval[field.aiKey as string] : "—"}</span>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="mt-6 pt-5 space-y-3">
+                            <div className="space-y-3 px-1">
                                 {!jurySubmitted ? (
                                     <button
                                         onClick={handleJurySubmit}
@@ -412,7 +412,7 @@ function TeamDetailsContent() {
                                 )}
 
                                 {jurySubmitted && aiAvg && (
-                                    <div className="bg-brand-accent/5 rounded-xl p-4 mt-4 flex items-center justify-between">
+                                    <div className="bg-brand-accent/5 rounded-xl p-4 flex items-center justify-between border border-brand-accent/10">
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-black tracking-widest text-[#0F1E2E] uppercase">Ai avg</span>
                                             <span className="text-lg font-black text-[#0F1E2E]">{aiAvg}</span>
