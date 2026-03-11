@@ -3,7 +3,6 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import LogosHeader from "../../components/LogosHeader";
 import { ArrowLeft, Target, Zap, TrendingUp, Sparkles, AlertTriangle, Users, Heart, Hammer, MessageSquare, Send, CheckCircle2, ChevronDown } from "lucide-react";
 
 // --- Helpers ---
@@ -67,7 +66,7 @@ function TeamDetailsContent() {
     const [error, setError] = useState<string | null>(null);
 
     // Jury Form State
-    const [juryScores, setJuryScores] = useState({ d: 5, f: 5, v: 5 });
+    const [juryScores, setJuryScores] = useState<any>({ d: "", f: "", v: "" });
     const [juryFeedback, setJuryFeedback] = useState("");
     const [submittingJury, setSubmittingJury] = useState(false);
     const [jurySubmitted, setJurySubmitted] = useState(false);
@@ -143,9 +142,9 @@ function TeamDetailsContent() {
                 .insert({
                     idea_id: id,
                     team_name: submission.team_name,
-                    desirability_score: Math.round(juryScores.d),
-                    feasibility_score: Math.round(juryScores.f),
-                    viability_score: Math.round(juryScores.v),
+                    desirability_score: juryScores.d ? Math.round(Number(juryScores.d)) : null,
+                    feasibility_score: juryScores.f ? Math.round(Number(juryScores.f)) : null,
+                    viability_score: juryScores.v ? Math.round(Number(juryScores.v)) : null,
                     overall_comments: juryFeedback,
                     evaluated_at: new Date().toISOString()
                 });
@@ -176,25 +175,29 @@ function TeamDetailsContent() {
     };
 
     const juryAvg = useMemo(() => {
-        return ((juryScores.d + juryScores.f + juryScores.v) / 3).toFixed(2);
+        const scores = [Number(juryScores.d), Number(juryScores.f), Number(juryScores.v)].filter(v => !isNaN(v) && v > 0);
+        if (scores.length === 0) return "0.00";
+        return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
     }, [juryScores]);
 
     const aiAvg = aiEval ? Number(aiEval.average_dfv_score).toFixed(2) : null;
     const scoreDelta = aiAvg ? (Number(juryAvg) - Number(aiAvg)).toFixed(2) : null;
 
-    const getEmoji = (delta: number) => {
-        if (delta > 1) return "🤩";
-        if (delta > 0) return "😄";
-        if (delta > -0.5) return "🧐";
-        if (delta > -1.5) return "🤨";
-        return "😵‍💫";
-    };
-
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-50 font-sans">
-                <LogosHeader />
-                <div className="flex flex-col items-center justify-center p-20 space-y-4">
+            <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
+                <header className="w-full px-6 md:px-12 py-3 flex items-center justify-between" style={{ zoom: 0.9 }}>
+                    <div className="flex items-center gap-8 md:gap-12 w-1/3">
+                        <img src="/pes_v2.png" alt="PES" className="h-10 md:h-14 w-auto object-contain opacity-50 blur-sm" />
+                    </div>
+                    <div className="w-1/3 flex border-x border-transparent justify-center">
+                        <img src="/idealens.png" alt="IdeaLens" className="h-16 md:h-24 w-auto object-contain scale-[1.2] origin-center opacity-50 blur-sm" />
+                    </div>
+                    <div className="w-1/3 flex justify-end">
+                        <img src="/cie.png" alt="CIE" className="h-10 md:h-12 w-auto object-contain opacity-50 blur-sm" />
+                    </div>
+                </header>
+                <div className="flex-1 flex flex-col items-center justify-center p-20 space-y-4">
                     <div className="h-12 w-12 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"></div>
                     <div className="text-xl text-slate-500 font-bold uppercase italic tracking-widest animate-pulse">Initializing Interface...</div>
                 </div>
@@ -223,250 +226,204 @@ function TeamDetailsContent() {
     }
 
     return (
-        <div className="relative min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-brand-accent/30 selection:text-white">
-            <LogosHeader />
-
-            <main className="w-full px-12 mt-0 pb-20">
-                {/* Modern Navigation Header */}
-                <div className="flex items-center justify-between mb-12 pb-6 border-b border-slate-100">
+        <div className="relative min-h-screen bg-slate-50 font-sans text-slate-900 text-[17px] selection:bg-brand-accent/30 selection:text-white">
+            {/* --- UNIFIED HEADER --- */}
+            <header className="w-full px-6 md:px-12 pt-0 pb-2 -mt-4 flex items-center justify-between" style={{ zoom: 0.9 }}>
+                <div className="flex items-center gap-8 md:gap-12 w-1/3">
                     <button
                         onClick={() => router.push('/')}
-                        className="group flex items-center gap-3 px-6 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-brand-accent/30 transition-all text-[11px] font-black uppercase tracking-[0.2em] text-black hover:text-brand-accent"
+                        className="group flex items-center shrink-0 gap-2 py-2 transition-all text-xs font-black uppercase tracking-widest text-slate-700 hover:text-brand-accent"
                     >
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         Back
                     </button>
-
+                    <img src="/pes_v2.png" alt="PES" className="h-20 md:h-28 w-auto object-contain" />
                 </div>
+                
+                <div className="w-1/3 flex border-x border-transparent justify-center">
+                    <img src="/idealens.png" alt="IdeaLens" className="h-32 md:h-48 w-auto object-contain scale-[1.2] origin-center" />
+                </div>
+                
+                <div className="w-1/3 flex justify-end">
+                    <img src="/cie.png" alt="CIE" className="h-20 md:h-28 w-auto object-contain" />
+                </div>
+            </header>
 
-                {/* --- TEAM IDENTITY SECTION (TOP) --- */}
-                <header className="mb-12">
-                    <div className="flex items-center gap-6">
-                        <div className="h-16 w-2 bg-brand-accent rounded-full shadow-lg shadow-brand-accent/20"></div>
-                        <div className="space-y-2">
-                            <div className="flex items-baseline gap-6">
-                                <h1 className="text-7xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">
+            <main className="w-full max-w-[1700px] mx-auto px-6 lg:px-12 mt-6 pb-20" style={{ zoom: 0.9 }}>
+                <div className="flex flex-col gap-12">
+                    
+                    {/* --- TEAM IDENTITY SECTION --- */}
+                    <section className="flex items-start gap-4">
+                        <div className="h-14 w-1.5 mt-2 bg-brand-accent rounded-full shrink-0"></div>
+                        <div className="space-y-3 flex-1">
+                            <div className="flex flex-col md:flex-row md:items-center gap-4">
+                                <h1 className="text-4xl md:text-5xl font-black text-slate-900 italic tracking-tighter leading-none">
                                     {submission.team_name}
                                 </h1>
                                 {jurySubmitted && (
-                                    <div className="bg-emerald-50 text-emerald-600 font-black text-[10px] px-3 py-1.5 rounded-lg uppercase tracking-widest flex items-center gap-1.5 shadow-sm border border-emerald-100">
-                                        <CheckCircle2 size={12} />
+                                    <div className="bg-emerald-50 text-emerald-600 font-bold text-sm px-3 py-1.5 rounded-md tracking-wider flex items-center gap-1.5 shadow-sm border border-emerald-100 w-fit">
+                                        <CheckCircle2 size={14} />
                                         Evaluated
                                     </div>
                                 )}
                             </div>
                             {submission.project_title && submission.project_title !== submission.team_name && (
-                                <p className="text-xl font-bold text-slate-400 uppercase italic tracking-tight opacity-80">
+                                <p className="text-xl font-bold text-slate-500 italic tracking-tight opacity-90">
                                     {submission.project_title}
                                 </p>
                             )}
                         </div>
-                    </div>
-                </header>
+                    </section>
 
-                {/* --- EVALUATION SECTION (Now under Team Identity) --- */}
-                <section className="space-y-12 mb-24">
-                    <div className="flex items-center gap-6">
-                        <div className="h-12 w-2 bg-slate-900 rounded-full"></div>
-                        <h2 className="text-4xl font-black uppercase italic tracking-tight text-slate-900">JURY SCORE BOARD</h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                        {/* Separate Metric Cards (White & Interactive) */}
-                        <div className="lg:col-span-2 space-y-10">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                {[
-                                    { label: "Desirability", key: "d" as const, aiKey: "desirability_score", icon: <Heart size={20} className="text-amber-400" />, color: "border-amber-100/50" },
-                                    { label: "Feasibility", key: "f" as const, aiKey: "feasibility_score", icon: <Hammer size={20} className="text-emerald-400" />, color: "border-emerald-100/50" },
-                                    { label: "Viability", key: "v" as const, aiKey: "viability_score", icon: <TrendingUp size={20} className="text-indigo-400" />, color: "border-indigo-100/50" },
-                                ].map((field) => (
-                                    <div key={field.key} className={`bg-white p-8 rounded-[2.5rem] border ${field.color} shadow-sm space-y-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group`}>
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mt-2">
-                                                {field.icon}
-                                                {field.label}
-                                            </div>
-                                            <div className="flex flex-col items-end gap-1">
-                                                <span className="text-3xl font-black italic text-slate-900 group-hover:scale-110 transition-transform leading-none">{juryScores[field.key]}</span>
-                                                {jurySubmitted && aiEval?.[field.aiKey] && (
-                                                    <span className="text-[10px] font-black text-brand-accent tracking-[0.1em] uppercase flex items-center gap-1.5 bg-brand-accent/10 px-2.5 py-1 rounded-md">
-                                                        <Sparkles size={10} /> <span className="opacity-70 font-bold">AI:</span> <span className="text-xs">{aiEval[field.aiKey]}</span>
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="relative pt-2">
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max="10"
-                                                step="0.5"
-                                                disabled={jurySubmitted}
-                                                value={juryScores[field.key]}
-                                                onChange={(e) => setJuryScores({ ...juryScores, [field.key]: parseFloat(e.target.value) })}
-                                                className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-slate-900 disabled:opacity-30 disabled:cursor-not-allowed"
-                                            />
-                                            <div className="flex justify-between mt-2 px-1">
-                                                <span className="text-[9px] font-bold text-slate-200">0</span>
-                                                <span className="text-[9px] font-bold text-slate-200">10</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {!jurySubmitted ? (
-                                <button
-                                    onClick={handleJurySubmit}
-                                    disabled={submittingJury}
-                                    className="w-fit px-12 mx-auto py-7 rounded-[2rem] bg-slate-900 text-white font-black text-sm uppercase italic tracking-[0.4em] shadow-2xl hover:bg-brand-blue transition-all flex items-center justify-center gap-4 active:scale-[0.98] disabled:opacity-50 group"
-                                >
-                                    {submittingJury ? "Submitting..." : "Submit"}
-                                </button>
-                            ) : (
-                                <div className="w-full py-7 rounded-[2rem] bg-emerald-50 border border-emerald-100 text-emerald-600 font-black text-sm uppercase italic tracking-[0.4em] flex items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-4">
-                                    <CheckCircle2 size={24} /> Official Verdict Registered ✅
+                    {/* --- PARALLEL SIGNALS & SCORING --- */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                        
+                        {/* LEFT: SIGNALS STACK */}
+                        <div className="lg:col-span-7 flex flex-col gap-10">
+                            <section>
+                                <div className="flex items-center gap-3 mb-6">
+                                    <h2 className="text-2xl font-black italic tracking-tight text-slate-900">Signals</h2>
                                 </div>
-                            )}
-                        </div>
-
-                        {/* AI Comparison */}
-                        <div className="flex flex-col h-full">
-                            <div className="flex-1 bg-white p-8 rounded-[2.5rem] border border-brand-accent/20 shadow-sm flex flex-col relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-
-                                {!jurySubmitted ? (
-                                    <div className="space-y-6 relative z-10 flex flex-col items-center justify-center h-full">
-                                        <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center border-4 border-dashed border-slate-100 relative">
-                                            <AlertTriangle size={32} className="text-slate-200" />
-                                            <div className="absolute inset-0 rounded-full border-4 border-slate-100 animate-ping opacity-20"></div>
-                                        </div>
-                                        <h3 className="text-xs font-black uppercase tracking-[0.6em] text-slate-300">Analysis Encrypted</h3>
-                                    </div>
-                                ) : (
-                                    <div className="w-full h-full flex flex-col justify-between animate-premium relative z-10">
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] text-brand-accent">
-                                                <Sparkles size={20} className="text-brand-accent" />
-                                                AI SCORE
-                                            </div>
-                                            <span className="text-5xl font-black italic text-slate-900 group-hover:scale-110 transition-transform origin-top-right">{aiAvg || "N/A"}</span>
-                                        </div>
-
-                                        {aiAvg && (
-                                            <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col gap-4">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Score Variance</span>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-2xl">{getEmoji(Number(scoreDelta))}</span>
-                                                        <span className={`text-4xl font-black italic transition-all group-hover:scale-110 origin-right ${Number(scoreDelta) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                            {Math.abs(Number(scoreDelta)).toFixed(2)}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="text-[9px] text-slate-400 font-bold bg-slate-50/50 p-4 rounded-2xl border border-slate-100 text-center leading-relaxed">
-                                                    AI Avg: <span className="text-slate-900">{aiAvg}</span> | Jury Avg: <span className="text-slate-900">{juryAvg}</span><br />
-                                                    Final Difference: <span className={Number(scoreDelta) >= 0 ? "text-emerald-600" : "text-rose-600"}>{Math.abs(Number(scoreDelta)).toFixed(2)}</span>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* --- SIGNALS (Collapsible) --- */}
-                {(aiEval?.market_context_signal || aiEval?.execution_readiness_signal || submission?.market_context_signal || submission?.execution_readiness_signal) && (
-                    <section className="mb-24 pt-12 border-t border-slate-200">
-                        <details className="group bg-white border border-slate-100 rounded-[3rem] shadow-sm overflow-hidden hover:shadow-md transition-all duration-500">
-                            <summary className="cursor-pointer p-10 flex items-center justify-between text-4xl font-black uppercase italic tracking-tight text-slate-900 border-b border-transparent group-open:border-slate-100 group-open:bg-slate-50/50 transition-colors select-none">
-                                <span className="flex items-center gap-6">
-                                    <div className="h-12 w-2 bg-brand-accent rounded-full"></div>
-                                    SIGNALS
-                                </span>
-                                <span className="transition-transform duration-300 group-open:-rotate-180 text-slate-400">
-                                    <ChevronDown size={40} />
-                                </span>
-                            </summary>
-                            <div className="p-16">
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                    {['market_context_signal', 'execution_readiness_signal'].map((key) => {
+                                <div className="flex flex-col gap-8">
+                                    {['market_context_signal', 'execution_readiness_signal', 'problem_description'].map((key) => {
                                         const value = aiEval?.[key] || submission?.[key];
                                         if (!value) return null;
 
                                         return (
-                                            <details key={key} className="group/item border border-slate-100 rounded-2xl bg-white shadow-sm hover:shadow-md transition-all h-fit">
-                                                <summary className="cursor-pointer px-8 py-6 flex items-center justify-between transition-colors select-none group-open/item:bg-slate-50 group-open/item:rounded-t-2xl">
-                                                    <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-800">
+                                            <div key={key} className="flex flex-col border-l-2 border-slate-100 pl-6 py-1">
+                                                <div className="pb-1">
+                                                    <span className="text-[14px] font-black tracking-[0.15em] text-slate-900 uppercase">
                                                         {formatLabel(key)}
                                                     </span>
-                                                    <span className="transition-transform duration-300 group-open/item:-rotate-180 text-slate-400">
-                                                        <ChevronDown size={20} />
-                                                    </span>
-                                                </summary>
-                                                <div className="px-8 pb-8 pt-4 text-base leading-relaxed text-slate-700 bg-white group-open/item:rounded-b-2xl border-t border-slate-50 whitespace-pre-wrap font-medium">
+                                                </div>
+                                                <div className="text-[15px] leading-relaxed text-slate-700 whitespace-pre-wrap font-medium">
                                                     {renderValue(value)}
                                                 </div>
-                                            </details>
+                                            </div>
                                         );
                                     })}
                                 </div>
-                            </div>
-                        </details>
-                    </section>
-                )}
+                            </section>
 
-                {/* --- SUBMISSION DATA (Team Details, Collapsible) --- */}
-                <section className="mb-24 pt-12 border-t border-slate-200">
-                    <details className="group bg-white border border-slate-100 rounded-[3rem] shadow-sm overflow-hidden hover:shadow-md transition-all duration-500">
-                        <summary className="cursor-pointer p-10 flex items-center justify-between text-4xl font-black uppercase italic tracking-tight text-slate-900 border-b border-transparent group-open:border-slate-100 group-open:bg-slate-50/50 transition-colors select-none">
-                            <span className="flex items-center gap-6">
-                                <div className="h-12 w-2 bg-slate-900 rounded-full"></div>
-                                TEAM DETAILS
-                            </span>
-                            <span className="transition-transform duration-300 group-open:-rotate-180 text-slate-400">
-                                <ChevronDown size={40} />
-                            </span>
-                        </summary>
-                        <div className="p-16">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                {Object.entries(submission).map(([key, value]) => {
-                                    // Exclude metadata keys and specific requested keys
-                                    const excludedKeys = [
-                                        'id', 'team_name', 'project_title', 'created_at', 'updated_at',
-                                        // Specific UI details to remove (From screenshots)
-                                        'submitted_at', 'email', 'track_vertical', 'team_members',
-                                        'primary_contact', 'problem_statement_short', 'pretotyping_done', 'pretypes_used',
-                                        'pretotype_experiment_description', 'users_interacted_count', 'key_insights_pivots',
-                                        'team_advantage', 'pitch_deck_pdf', 'demo_link',
-                                        'preferred_day_16_march', 'preferred_day_17_march', 'preferred_day_18_march',
-                                        'preferred_day_any', 'consent_box'
-                                    ];
+                            {/* --- SUBMISSION DATA (Team Details, Collapsible) --- */}
+                            <details className="group overflow-hidden transition-all duration-300 mt-4 border-t border-slate-100">
+                                <summary className="cursor-pointer py-6 flex items-center justify-between text-2xl font-black italic tracking-tight text-slate-900 transition-colors select-none">
+                                    Team Details
+                                    <span className="transition-transform duration-300 group-open:-rotate-180 text-slate-400">
+                                        <ChevronDown size={24} />
+                                    </span>
+                                </summary>
+                                <div className="pb-10 pt-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+                                        {Object.entries(submission).map(([key, value]) => {
+                                            const excludedKeys = [
+                                                'id', 'team_name', 'project_title', 'created_at', 'updated_at', 
+                                                'submitted_at', 'email', 'track_vertical', 'team_members', 'primary_contact', 
+                                                'problem_description', 
+                                                'pretotyping_done', 'pretypes_used', 'pretotype_experiment_description', 
+                                                'users_interacted_count', 'key_insights_pivots', 'team_advantage', 
+                                                'pitch_deck_pdf', 'demo_link', 'preferred_day_16_march', 
+                                                'preferred_day_17_march', 'preferred_day_18_march', 'preferred_day_any', 
+                                                'consent_box'
+                                            ];
+                                            if (excludedKeys.includes(key) || key.startsWith('preferred_') || key === 'consent_box') return null;
 
-                                    if (excludedKeys.includes(key) || key.startsWith('preferred_') || key === 'consent_box') return null;
+                                            return (
+                                                <div key={key} className="flex flex-col gap-1.5 h-fit">
+                                                    <span className="text-[12px] font-black tracking-widest text-slate-900 uppercase">
+                                                        {formatLabel(key)}
+                                                    </span>
+                                                    <div className="text-[13px] font-semibold text-slate-700 leading-snug">
+                                                        {renderValue(value)}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
 
-                                    return (
-                                        <details key={key} className="group/item border border-slate-100 rounded-2xl bg-white shadow-sm hover:shadow-md transition-all h-fit">
-                                            <summary className="cursor-pointer px-8 py-6 flex items-center justify-between transition-colors select-none group-open/item:bg-slate-50 group-open/item:rounded-t-2xl">
-                                                <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-800">
-                                                    {formatLabel(key)}
-                                                </span>
-                                                <span className="transition-transform duration-300 group-open/item:-rotate-180 text-slate-400">
-                                                    <ChevronDown size={20} />
-                                                </span>
-                                            </summary>
-                                            <div className="px-8 pb-8 pt-4 text-base leading-relaxed text-slate-700 bg-white group-open/item:rounded-b-2xl border-t border-slate-50">
-                                                {renderValue(value)}
+                        {/* RIGHT: JURY SCORE BOARD (Dynamic Vertical Stack) */}
+                        <div className="lg:col-span-5 flex flex-col gap-8 lg:sticky lg:top-8">
+                            <div className="flex flex-col gap-6">
+                                <h2 className="text-2xl font-black italic tracking-tight text-[#0F1E2E]">Jury Scoring Board</h2>
+                                
+                                <div className="flex flex-col gap-4">
+                                    {[
+                                        { label: "DESIRABILITY", key: "d" as const, aiKey: "desirability_score", icon: "🖤" },
+                                        { label: "FEASIBILITY", key: "f" as const, aiKey: "feasibility_score", icon: "🛠️" },
+                                        { label: "VIABILITY", key: "v" as const, aiKey: "viability_score", icon: "💰" },
+                                    ].map((field) => (
+                                        <div key={field.key} className="bg-white rounded-[20px] border border-slate-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)] p-5 flex flex-row items-center justify-between gap-6 transition-transform hover:scale-[1.01] overflow-hidden group">
+                                            <div className="flex flex-col gap-1 min-w-[120px]">
+                                                <div className="flex items-center gap-2 text-[12px] font-black text-slate-900 uppercase tracking-widest leading-none">
+                                                    <span className="text-lg opacity-80 group-hover:opacity-100 transition-opacity">{field.icon}</span>
+                                                    {field.label}
+                                                </div>
+                                                {jurySubmitted && field.aiKey && aiEval?.[field.aiKey] && (
+                                                    <div className="mt-2 flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold text-brand-accent/60 uppercase tracking-tighter">AI Score</span>
+                                                        <span className="text-xs font-black text-brand-accent">{aiEval[field.aiKey]}</span>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </details>
-                                    );
-                                })}
+                                            
+                                            <div className="flex flex-row items-center gap-4 bg-slate-50/50 rounded-xl px-6 py-2 border border-slate-100">
+                                                <input
+                                                    type="text"
+                                                    disabled={jurySubmitted}
+                                                    value={juryScores[field.key]}
+                                                    onChange={(e) => setJuryScores({ ...juryScores, [field.key]: e.target.value })}
+                                                    className="w-10 text-center text-3xl font-black text-[#0F1E2E] bg-transparent focus:outline-none disabled:opacity-50"
+                                                    placeholder="-"
+                                                />
+                                                <div className="flex flex-col items-center opacity-30 select-none">
+                                                    <div className="w-px h-6 bg-slate-400"></div>
+                                                    <span className="text-[10px] font-black italic leading-none mt-1">10</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex flex-col gap-4 mt-2">
+                                    {!jurySubmitted && (
+                                        <button
+                                            onClick={handleJurySubmit}
+                                            disabled={submittingJury}
+                                            className="w-full py-4 rounded-xl bg-brand-accent text-white font-black text-[13px] uppercase tracking-[0.2em] shadow-[0_8px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.15)] hover:bg-brand-blue transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
+                                        >
+                                            {submittingJury ? "Submitting Analysis..." : "Submit Verification"}
+                                        </button>
+                                    )}
+
+                                    {jurySubmitted && (
+                                        <div className="flex flex-col gap-4">
+                                            <div className="w-full py-3.5 rounded-xl bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(16,185,129,0.2)]">
+                                                <CheckCircle2 size={16} /> Verdict Registered
+                                            </div>
+
+                                            {aiAvg && (
+                                                <div className="flex items-center gap-3 w-full">
+                                                    <div className="flex-1 bg-white rounded-xl px-5 py-3 border border-slate-100 shadow-sm flex items-center justify-between overflow-hidden relative">
+                                                        <div className="absolute top-0 right-0 w-1 h-full bg-brand-accent/10"></div>
+                                                        <span className="text-[10px] font-black tracking-widest text-[#0F1E2E] uppercase">Ai avg</span>
+                                                        <span className="text-xl font-black text-brand-accent italic">{aiAvg}</span>
+                                                    </div>
+                                                    <div className="flex-1 bg-white rounded-xl px-5 py-3 border border-slate-100 shadow-sm flex items-center justify-between">
+                                                        <span className="text-[11px] font-bold tracking-widest text-slate-900 uppercase">Variance</span>
+                                                        <span className="text-base font-black text-slate-900 border-b-2 border-slate-100">{Math.abs(Number(scoreDelta)).toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </details>
-                </section>
+                    </div>
+                </div>
             </main>
 
             <style jsx global>{`
@@ -493,11 +450,14 @@ function TeamDetailsContent() {
 export default function TeamDetailsPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-slate-50 font-sans">
-                <LogosHeader />
-                <div className="flex flex-col items-center justify-center p-20 space-y-4">
+            <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
+                {/* Minimal Loading Header */}
+                <header className="w-full px-6 py-3 bg-white border-b border-slate-200 shadow-sm flex justify-center">
+                    <img src="/idealens.png" alt="IdeaLens" className="h-16 blur-sm opacity-50 w-auto object-contain" />
+                </header>
+                <div className="flex-1 flex flex-col items-center justify-center p-20 space-y-6">
                     <div className="h-12 w-12 border-4 border-brand-accent border-t-transparent rounded-full animate-spin"></div>
-                    <div className="text-xl text-slate-500 font-bold uppercase italic tracking-widest animate-pulse">
+                    <div className="text-lg text-slate-500 font-bold uppercase italic tracking-widest animate-pulse">
                         Synchronizing Intelligence...
                     </div>
                 </div>

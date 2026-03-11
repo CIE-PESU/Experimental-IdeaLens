@@ -94,35 +94,20 @@ export default function Home() {
       <main className="w-full px-12 mt-0 pb-10">
 
         {/* SEARCH BAR (OUTSIDE HEADER) */}
-        <div className="flex justify-center mb-6">
-          <div className="relative w-full max-w-xl group">
+        <div className="flex justify-center mb-6 -mt-8">
+          <div className="relative w-full max-w-md group">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search team name"
-              className="w-full bg-white rounded-2xl border border-slate-200 px-8 py-4 text-lg shadow-sm group-hover:shadow-md focus:ring-4 focus:ring-brand-accent/10 focus:border-brand-accent/30 outline-none transition-all placeholder:text-slate-300 font-medium italic"
+              className="w-full bg-white rounded-2xl border border-slate-200 px-5 py-3 text-sm shadow-sm group-hover:shadow-md focus:ring-4 focus:ring-brand-accent/10 focus:border-brand-accent/30 outline-none transition-all placeholder:text-slate-300 font-medium italic"
             />
-            <Search className="absolute right-8 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-hover:text-brand-accent transition-colors" />
+            <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-hover:text-brand-accent transition-colors" />
           </div>
         </div>
 
         {/* PROGRESS & VIEW CONTROLS */}
-        <section className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-slate-100 pb-8">
-          <div className="flex-1 space-y-4 max-w-lg">
-            <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-[0.2em]">
-              <span className="text-slate-400">Global Evaluation Progress</span>
-              <span className="text-brand-accent">{stats.evaluated} / {stats.total} TEAMS</span>
-            </div>
-            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-brand-accent transition-all duration-1000 ease-out"
-                style={{ width: `${stats.progress}%` }}
-              ></div>
-            </div>
-          </div>
-
-        </section>
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -139,41 +124,39 @@ export default function Home() {
             No intelligence matches found for your current filter parameters.
           </div>
         ) : (
-          <div className="flex flex-col">
-            {processedTeams.map((team, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {processedTeams.map((team) => (
               <Link
                 key={team.id}
                 href={`/idea/team?id=${encodeURIComponent(team.id)}`}
-                className="group flex items-center justify-between py-6 border-b border-slate-100 hover:bg-slate-50/50 transition-all px-4"
+                className="group bg-white rounded-[24px] border border-slate-100 p-5 shadow-sm hover:shadow-xl hover:scale-[1.03] transition-all flex flex-col items-center text-center gap-4 relative overflow-hidden"
               >
-                {/* Left Section: Logo & Name */}
-                <div className="flex items-center gap-6">
-                  <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center overflow-hidden relative group-hover:scale-105 transition-transform">
-                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:12px_12px]"></div>
-                    <span className="text-2xl font-black text-white/30 uppercase italic">
-                      {(team.team_name || "U").charAt(0)}
-                    </span>
-                  </div>
+                {/* Visual Accent */}
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-brand-accent/5 group-hover:bg-brand-accent transition-colors"></div>
 
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-xl font-black text-slate-900 uppercase italic group-hover:text-brand-accent transition-colors tracking-tight">
-                        {team.team_name || "Untitled"}
-                      </h3>
-                    </div>
-                    {viewMode === 'detailed' && team.email && (
-                      <p className="text-xs font-bold text-slate-400 italic max-w-lg truncate mt-1">
-                        Contact: {team.email}
-                      </p>
-                    )}
-                  </div>
+                {/* Logo Section */}
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-slate-900 flex items-center justify-center overflow-hidden relative shadow-lg group-hover:rotate-3 transition-transform">
+                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:10px_10px]"></div>
+                  <span className="text-2xl font-black text-white uppercase italic">
+                    {(team.team_name || "U").charAt(0)}
+                  </span>
                 </div>
 
-                {/* Right Section: Indicators & Actions */}
-                <div className="flex items-center gap-10">
-                  <div className="flex items-center gap-3 text-slate-300 group-hover:text-brand-accent transition-all">
-                    <ArrowRight size={20} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
-                  </div>
+                <div className="flex flex-col items-center gap-1">
+                  <h3 className="text-[13px] font-black text-slate-900 uppercase italic group-hover:text-brand-accent transition-colors tracking-tight leading-snug">
+                    {team.team_name || "Untitled"}
+                  </h3>
+                  {team.submitted_at && (
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic opacity-40">
+                      ID: {team.id.slice(0, 4)}
+                    </span>
+                  )}
+                </div>
+
+                <div className="w-full h-px bg-slate-50"></div>
+                
+                <div className="flex items-center justify-center gap-2 text-brand-accent font-black text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                  DIVE <ChevronRight size={12} strokeWidth={4} />
                 </div>
               </Link>
             ))}
