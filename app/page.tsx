@@ -94,7 +94,7 @@ export default function Home() {
       <main className="w-full px-12 mt-0 pb-10">
 
         {/* SEARCH BAR (OUTSIDE HEADER) */}
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-6 -mt-8">
           <div className="relative w-full max-w-md group">
             <input
               type="text"
