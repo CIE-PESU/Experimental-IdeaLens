@@ -298,7 +298,17 @@ function TeamDetailsContent() {
 
                                         // Clean up unwanted characters from Google Forms/Sheets flow
                                         if (typeof value === 'string') {
-                                            value = value.replace(/\r/g, '').replace(/\n{3,}/g, '\n\n').trim();
+                                            // 1. Remove carriage returns
+                                            // 2. Normalize multiple newlines (3+) to double newlines
+                                            // 3. Temporarily protect double newlines
+                                            // 4. Convert single newlines to spaces
+                                            // 5. Restore protected double newlines
+                                            value = value.replace(/\r/g, '')
+                                                .replace(/\n{3,}/g, '\n\n')
+                                                .split('\n\n')
+                                                .map(p => p.replace(/\n/g, ' ').trim())
+                                                .join('\n\n')
+                                                .trim();
                                         }
 
                                         const isAI = key === 'market_context_signal' || key === 'execution_readiness_signal';
