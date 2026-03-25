@@ -3,8 +3,9 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { ArrowLeft, Target, Zap, TrendingUp, Sparkles, AlertTriangle, Users, Heart, Hammer, MessageSquare, Send, CheckCircle2, ChevronDown, Rocket, PieChart, Microscope, Swords, Briefcase, Gem, PlusCircle } from "lucide-react";
+import { ArrowLeft, Target, Zap, TrendingUp, Sparkles, AlertTriangle, Users, Heart, Hammer, MessageSquare, Send, CheckCircle2, ChevronDown, Rocket, PieChart, Microscope, Swords, Briefcase, Gem, PlusCircle, Search, Home } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 // --- Helpers ---
 
@@ -54,6 +55,77 @@ const renderValue = (val: any) => {
 };
 
 // --- Components ---
+
+function TeamSearchDropdown() {
+    const router = useRouter();
+    const [query, setQuery] = useState("");
+    const [teams, setTeams] = useState<any[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchTeams = async () => {
+            const { data } = await supabase
+                .from("idealens_submissions2")
+                .select("id, team_name, team_members")
+                .order("submitted_at", { ascending: false });
+            if (data) setTeams(data);
+        };
+        fetchTeams();
+    }, []);
+
+    const filtered = useMemo(() => {
+        if (!query.trim()) return [];
+        const q = query.toLowerCase();
+        return teams.filter(t => 
+            (t.team_name || "").toLowerCase().includes(q) ||
+            (t.team_members || "").toLowerCase().includes(q)
+        ).slice(0, 8);
+    }, [query, teams]);
+
+    return (
+        <div className="relative w-full max-w-md group z-50">
+            <input
+                type="text"
+                value={query}
+                onChange={(e) => {
+                    setQuery(e.target.value);
+                    setIsOpen(true);
+                }}
+                onFocus={() => setIsOpen(true)}
+                onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+                placeholder="Search team name or member"
+                className="w-full bg-white rounded-2xl border border-slate-200 px-5 py-3 text-sm shadow-sm group-hover:shadow-md focus:ring-4 focus:ring-brand-accent/10 focus:border-brand-accent/30 outline-none transition-all placeholder:text-slate-300 font-medium italic"
+            />
+            <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-hover:text-brand-accent transition-colors pointer-events-none" />
+            
+            {isOpen && filtered.length > 0 && (
+                <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-50">
+                    {filtered.map(t => (
+                        <Link 
+                            key={t.id}
+                            href={`/idea/team?id=${encodeURIComponent(t.id)}`}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                                setIsOpen(false);
+                                setQuery("");
+                            }}
+                            className="p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0 flex flex-col gap-0.5 block"
+                        >
+                            <div className="text-[13px] font-bold text-slate-900 leading-tight">
+                                {t.team_name || "Untitled"}
+                            </div>
+                            {t.team_members && (
+                                <div className="text-[11px] text-slate-500 truncate leading-tight">
+                                    {t.team_members}
+                                </div>
+                            )}
+                        </Link>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 function TeamDetailsContent() {
     const searchParams = useSearchParams();
@@ -234,13 +306,22 @@ function TeamDetailsContent() {
                 <div className="flex items-center justify-between w-full max-w-7xl mx-auto">
                     {/* PES Logo + BACK Button */}
                     <div className="flex items-center gap-4 flex-shrink-0">
-                        <button
-                            onClick={() => router.push('/')}
-                            className="group flex items-center shrink-0 gap-2 py-2 transition-all text-xs font-black uppercase tracking-widest text-slate-700 hover:text-brand-accent"
-                        >
-                            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                            BACK
-                        </button>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => router.back()}
+                                className="group flex items-center justify-center shrink-0 h-9 w-9 rounded-full transition-all text-slate-700 hover:bg-slate-200 hover:text-brand-accent"
+                                title="Go Back"
+                            >
+                                <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+                            </button>
+                            <button
+                                onClick={() => router.push('/')}
+                                className="group flex items-center justify-center shrink-0 h-9 w-9 rounded-full transition-all text-slate-700 hover:bg-slate-200 hover:text-brand-accent"
+                                title="Home Dashboard"
+                            >
+                                <Home size={18} className="group-hover:scale-105 transition-transform" />
+                            </button>
+                        </div>
                         <Image src="/pes_v2.png" alt="PES" width={300} height={300} className="h-12 w-auto object-contain" priority />
                     </div>
 
@@ -257,6 +338,12 @@ function TeamDetailsContent() {
             </div>
 
             <main className="w-full max-w-[1700px] mx-auto px-6 lg:px-12 mt-6 pb-20" style={{ zoom: 0.9 }}>
+                
+                {/* SEARCH BAR */}
+                <div className="flex justify-center mb-8">
+                    <TeamSearchDropdown />
+                </div>
+
                 <div className="flex flex-col gap-12">
 
                     {/* --- TEAM IDENTITY SECTION --- */}
