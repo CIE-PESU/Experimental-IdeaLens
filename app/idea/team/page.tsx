@@ -3,8 +3,9 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { ArrowLeft, Target, Zap, TrendingUp, Sparkles, AlertTriangle, Users, Heart, Hammer, MessageSquare, Send, CheckCircle2, ChevronDown } from "lucide-react";
+import { ArrowLeft, Target, Zap, TrendingUp, Sparkles, AlertTriangle, Users, Heart, Hammer, MessageSquare, Send, CheckCircle2, ChevronDown, Rocket, PieChart, Microscope, Swords, Briefcase, Gem, PlusCircle, Search, Home } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 // --- Helpers ---
 
@@ -54,6 +55,77 @@ const renderValue = (val: any) => {
 };
 
 // --- Components ---
+
+function TeamSearchDropdown() {
+    const router = useRouter();
+    const [query, setQuery] = useState("");
+    const [teams, setTeams] = useState<any[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchTeams = async () => {
+            const { data } = await supabase
+                .from("idealens_submissions2")
+                .select("id, team_name, team_members")
+                .order("submitted_at", { ascending: false });
+            if (data) setTeams(data);
+        };
+        fetchTeams();
+    }, []);
+
+    const filtered = useMemo(() => {
+        if (!query.trim()) return [];
+        const q = query.toLowerCase();
+        return teams.filter(t => 
+            (t.team_name || "").toLowerCase().includes(q) ||
+            (t.team_members || "").toLowerCase().includes(q)
+        ).slice(0, 8);
+    }, [query, teams]);
+
+    return (
+        <div className="relative w-full max-w-md group z-50">
+            <input
+                type="text"
+                value={query}
+                onChange={(e) => {
+                    setQuery(e.target.value);
+                    setIsOpen(true);
+                }}
+                onFocus={() => setIsOpen(true)}
+                onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+                placeholder="Search team name or member"
+                className="w-full bg-white rounded-2xl border border-slate-200 px-5 py-3 text-sm shadow-sm group-hover:shadow-md focus:ring-4 focus:ring-brand-accent/10 focus:border-brand-accent/30 outline-none transition-all placeholder:text-slate-300 font-medium italic"
+            />
+            <Search className="absolute right-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-hover:text-brand-accent transition-colors pointer-events-none" />
+            
+            {isOpen && filtered.length > 0 && (
+                <div className="absolute top-full mt-2 w-full bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-50">
+                    {filtered.map(t => (
+                        <Link 
+                            key={t.id}
+                            href={`/idea/team?id=${encodeURIComponent(t.id)}`}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => {
+                                setIsOpen(false);
+                                setQuery("");
+                            }}
+                            className="p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0 flex flex-col gap-0.5 block"
+                        >
+                            <div className="text-[13px] font-bold text-slate-900 leading-tight">
+                                {t.team_name || "Untitled"}
+                            </div>
+                            {t.team_members && (
+                                <div className="text-[11px] text-slate-500 truncate leading-tight">
+                                    {t.team_members}
+                                </div>
+                            )}
+                        </Link>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 function TeamDetailsContent() {
     const searchParams = useSearchParams();
@@ -234,13 +306,22 @@ function TeamDetailsContent() {
                 <div className="flex items-center justify-between w-full max-w-7xl mx-auto">
                     {/* PES Logo + BACK Button */}
                     <div className="flex items-center gap-4 flex-shrink-0">
-                        <button
-                            onClick={() => router.push('/')}
-                            className="group flex items-center shrink-0 gap-2 py-2 transition-all text-xs font-black uppercase tracking-widest text-slate-700 hover:text-brand-accent"
-                        >
-                            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                            BACK
-                        </button>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => router.back()}
+                                className="group flex items-center justify-center shrink-0 h-9 w-9 rounded-full transition-all text-slate-700 hover:bg-slate-200 hover:text-brand-accent"
+                                title="Go Back"
+                            >
+                                <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
+                            </button>
+                            <button
+                                onClick={() => router.push('/')}
+                                className="group flex items-center justify-center shrink-0 h-9 w-9 rounded-full transition-all text-slate-700 hover:bg-slate-200 hover:text-brand-accent"
+                                title="Home Dashboard"
+                            >
+                                <Home size={18} className="group-hover:scale-105 transition-transform" />
+                            </button>
+                        </div>
                         <Image src="/pes_v2.png" alt="PES" width={300} height={300} className="h-12 w-auto object-contain" priority />
                     </div>
 
@@ -257,6 +338,12 @@ function TeamDetailsContent() {
             </div>
 
             <main className="w-full max-w-[1700px] mx-auto px-6 lg:px-12 mt-6 pb-20" style={{ zoom: 0.9 }}>
+                
+                {/* SEARCH BAR */}
+                <div className="flex justify-center mb-8">
+                    <TeamSearchDropdown />
+                </div>
+
                 <div className="flex flex-col gap-12">
 
                     {/* --- TEAM IDENTITY SECTION --- */}
@@ -333,42 +420,170 @@ function TeamDetailsContent() {
                             </section>
 
                             {/* --- SUBMISSION DATA (Team Details, Collapsible) --- */}
-                            <details className="group overflow-hidden transition-all duration-300 mt-4 border-t border-slate-100 bg-white/50 rounded-2xl hover:bg-white hover:shadow-sm transition-all">
-                                <summary className="cursor-pointer py-6 px-4 flex items-center justify-between text-2xl font-black italic tracking-tight text-slate-900 transition-colors select-none hover:text-brand-accent">
+                            {/* --- SUBMISSION DATA (Team Details, Collapsible) --- */}
+                            <details className="group overflow-hidden transition-all duration-300 mt-4 border border-slate-200 bg-white shadow-md rounded-2xl hover:shadow-lg" open>
+                                <summary className="cursor-pointer py-6 px-6 flex items-center justify-between text-2xl font-black italic tracking-tight text-slate-900 transition-colors select-none hover:text-brand-accent">
                                     <div className="flex items-center gap-3">
                                         Team Details
                                     </div>
                                     <span className="transition-transform duration-300 group-open:-rotate-180 text-slate-400 group-hover:text-brand-accent">
-                                        <ChevronDown size={24} />
+                                        <ChevronDown size={28} />
                                     </span>
                                 </summary>
-                                <div className="pb-10 pt-2 px-6 border-t border-slate-50">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-                                        {Object.entries(submission).map(([key, value]) => {
-                                            const excludedKeys = [
-                                                'id', 'team_name', 'project_title', 'created_at', 'updated_at',
-                                                'submitted_at', 'email', 'track_vertical', 'team_members', 'primary_contact',
-                                                'problem_description',
-                                                'pretotyping_done', 'pretypes_used', 'pretotype_experiment_description',
-                                                'users_interacted_count', 'key_insights_pivots', 'team_advantage',
-                                                'pitch_deck_pdf', 'demo_link', 'preferred_day_16_march',
-                                                'preferred_day_17_march', 'preferred_day_18_march', 'preferred_day_any',
-                                                'consent_box'
-                                            ];
-                                            if (excludedKeys.includes(key) || key.startsWith('preferred_') || key === 'consent_box') return null;
+                                <div className="pb-10 pt-4 px-6 border-t border-slate-100 flex flex-col gap-4">
+                                    {(() => {
+                                        const sections = [
+                                            {
+                                                title: "Problem & Solution",
+                                                icon: Target,
+                                                defaultOpen: true,
+                                                keys: ["solution_statement_short", "solution_stage"]
+                                            },
+                                            {
+                                                title: "Customer & Market",
+                                                icon: Users,
+                                                defaultOpen: false,
+                                                keys: ["customer_segments_end_users", "customer_segments_paying_customers", "customer_segments_influencers", "customer_segments_partners", "customer_selection_reason", "target_geography", "target_market_segments"]
+                                            },
+                                            {
+                                                title: "Market Sizing",
+                                                icon: PieChart,
+                                                defaultOpen: false,
+                                                keys: ["tam_total_addressable_market", "sam_serviceable_available_market", "som_serviceable_obtainable_market", "tam", "sam", "som"]
+                                            },
+                                            {
+                                                title: "Product & Validation",
+                                                icon: Microscope,
+                                                defaultOpen: false,
+                                                keys: ["critical_assumptions", "pretypes_used", "pretotypes_used"]
+                                            },
+                                            {
+                                                title: "Competition",
+                                                icon: Swords,
+                                                defaultOpen: false,
+                                                keys: ["competitors", "competitor_positioning"]
+                                            },
+                                            {
+                                                title: "Business Model",
+                                                icon: Briefcase,
+                                                defaultOpen: false,
+                                                keys: ["revenue_model_type", "revenue_model_description", "cost_structure"]
+                                            },
+                                            {
+                                                title: "Value Propositions",
+                                                icon: Gem,
+                                                defaultOpen: false,
+                                                keys: ["customer_value_proposition", "investor_value_proposition"]
+                                            }
+                                        ];
+
+                                        const excludedKeys = [
+                                            'id', 'team_name', 'project_title', 'created_at', 'updated_at',
+                                            'submitted_at', 'email', 'track_vertical', 'team_members', 'primary_contact',
+                                            'problem_description', 'problem_statement_short',
+                                            'pretotyping_done', 'pretotype_experiment_description',
+                                            'users_interacted_count', 'key_insights_pivots', 'team_advantage',
+                                            'pitch_deck_pdf', 'demo_link', 'preferred_day_16_march',
+                                            'preferred_day_17_march', 'preferred_day_18_march', 'preferred_day_any',
+                                            'consent_box'
+                                        ];
+
+                                        const usedKeys = new Set<string>();
+                                        const renderedSections = sections.map((section, idx) => {
+                                            const sectionFields = section.keys.filter(k => {
+                                                if (submission[k] !== undefined && submission[k] !== null && submission[k] !== '') {
+                                                    usedKeys.add(k);
+                                                    return true;
+                                                }
+                                                return false;
+                                            });
+
+                                            if (sectionFields.length === 0) return null;
 
                                             return (
-                                                <div key={key} className="flex flex-col gap-1.5 h-fit">
-                                                    <span className="text-[12px] font-black tracking-widest text-slate-900 uppercase">
-                                                        {formatLabel(key)}
-                                                    </span>
-                                                    <div className="text-[13px] font-semibold text-slate-700 leading-snug">
-                                                        {renderValue(value)}
+                                                <details key={idx} className="group/sub overflow-hidden border border-slate-100 bg-white shadow-sm rounded-xl transition-all" open={section.defaultOpen}>
+                                                    <summary className="cursor-pointer py-4 px-5 flex items-center justify-between text-xl font-bold tracking-tight text-slate-800 transition-colors select-none hover:bg-slate-50">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className="p-1.5 bg-brand-accent/10 rounded-lg text-brand-accent">
+                                                                <section.icon size={20} strokeWidth={2.5} />
+                                                            </div>
+                                                            <span>{section.title}</span>
+                                                        </div>
+                                                        <span className="transition-transform duration-300 group-open/sub:-rotate-180 text-slate-400">
+                                                            <ChevronDown size={20} />
+                                                        </span>
+                                                    </summary>
+                                                    <div className="p-5 pt-0 border-t border-slate-50 mt-1">
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 mt-6">
+                                                            {sectionFields.map(key => {
+                                                                let label = formatLabel(key);
+                                                                if (key === 'tam_total_addressable_market') label = 'TAM (Total Addressable Market)';
+                                                                if (key === 'sam_serviceable_available_market') label = 'SAM (Serviceable Available Market)';
+                                                                if (key === 'som_serviceable_obtainable_market') label = 'SOM (Serviceable Obtainable Market)';
+                                                                if (key === 'tam') label = 'TAM (Total Addressable Market)';
+                                                                if (key === 'sam') label = 'SAM (Serviceable Available Market)';
+                                                                if (key === 'som') label = 'SOM (Serviceable Obtainable Market)';
+                                                                if (key === 'pretypes_used' || key === 'pretotypes_used') label = 'Pretotypes Used';
+
+                                                                return (
+                                                                    <div key={key} className="flex flex-col gap-1.5 h-fit">
+                                                                        <span className="text-[12px] font-black tracking-widest text-slate-900 uppercase">
+                                                                            {label}
+                                                                        </span>
+                                                                        <div className="text-[13px] font-semibold text-slate-700 leading-snug">
+                                                                            {renderValue(submission[key])}
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                </details>
                                             );
-                                        })}
-                                    </div>
+                                        });
+
+                                        // Catch all remaining fields
+                                        const otherKeys = Object.keys(submission).filter(k => 
+                                            !excludedKeys.includes(k) && 
+                                            !k.startsWith('preferred_') && 
+                                            !usedKeys.has(k) &&
+                                            submission[k] !== null && submission[k] !== ''
+                                        );
+
+                                        if (otherKeys.length > 0) {
+                                            renderedSections.push(
+                                                <details key="other" className="group/sub overflow-hidden border border-slate-100 bg-white shadow-sm rounded-xl transition-all">
+                                                    <summary className="cursor-pointer py-4 px-5 flex items-center justify-between text-xl font-bold tracking-tight text-slate-800 transition-colors select-none hover:bg-slate-50">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className="p-1.5 bg-slate-100 rounded-lg text-slate-500">
+                                                                <PlusCircle size={20} strokeWidth={2.5} />
+                                                            </div>
+                                                            <span>Additional Details</span>
+                                                        </div>
+                                                        <span className="transition-transform duration-300 group-open/sub:-rotate-180 text-slate-400">
+                                                            <ChevronDown size={20} />
+                                                        </span>
+                                                    </summary>
+                                                    <div className="p-5 pt-0 border-t border-slate-50 mt-1">
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8 mt-6">
+                                                            {otherKeys.map(key => (
+                                                                <div key={key} className="flex flex-col gap-1.5 h-fit">
+                                                                    <span className="text-[12px] font-black tracking-widest text-slate-900 uppercase">
+                                                                        {formatLabel(key)}
+                                                                    </span>
+                                                                    <div className="text-[13px] font-semibold text-slate-700 leading-snug">
+                                                                        {renderValue(submission[key])}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </details>
+                                            );
+                                        }
+
+                                        return renderedSections;
+                                    })()}
                                 </div>
                             </details>
                         </div>
@@ -434,13 +649,20 @@ function TeamDetailsContent() {
                                             </div>
 
                                             {aiAvg && (
-                                                <div className="flex items-center gap-3 w-full">
-                                                    <div className="flex-1 bg-white rounded-xl px-5 py-3 border border-slate-100 shadow-sm flex items-center justify-between overflow-hidden relative">
-                                                        <div className="absolute top-0 right-0 w-1 h-full bg-brand-accent/10"></div>
-                                                        <span className="text-[10px] font-black tracking-widest text-[#0F1E2E] uppercase">Ai avg</span>
-                                                        <span className="text-xl font-black text-brand-accent italic">{aiAvg}</span>
+                                                <div className="flex flex-col gap-3 w-full">
+                                                    <div className="flex items-center gap-3 w-full">
+                                                        <div className="flex-1 bg-white rounded-xl px-5 py-3 border border-brand-accent/20 shadow-sm flex items-center justify-between overflow-hidden relative">
+                                                            <div className="absolute top-0 right-0 w-1 h-full bg-brand-accent/20"></div>
+                                                            <span className="text-[10px] font-black tracking-widest text-[#0F1E2E] uppercase">AI Average</span>
+                                                            <span className="text-xl font-black text-brand-accent italic">{aiAvg}</span>
+                                                        </div>
+                                                        <div className="flex-1 bg-white rounded-xl px-5 py-3 border border-emerald-500/20 shadow-sm flex items-center justify-between overflow-hidden relative">
+                                                            <div className="absolute top-0 right-0 w-1 h-full bg-emerald-500/20"></div>
+                                                            <span className="text-[10px] font-black tracking-widest text-[#0F1E2E] uppercase">Jury Average</span>
+                                                            <span className="text-xl font-black text-emerald-600 italic">{juryAvg}</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex-1 bg-white rounded-xl px-5 py-3 border border-slate-100 shadow-sm flex items-center justify-between">
+                                                    <div className="w-full bg-white rounded-xl px-5 py-3 border border-slate-100 shadow-sm flex items-center justify-between">
                                                         <span className="text-[11px] font-bold tracking-widest text-slate-900 uppercase">Variance</span>
                                                         <span className="text-base font-black text-slate-900 border-b-2 border-slate-100">{Math.abs(Number(scoreDelta)).toFixed(2)}</span>
                                                     </div>

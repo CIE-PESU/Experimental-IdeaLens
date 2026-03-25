@@ -5,13 +5,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import LogosHeader from "./components/LogosHeader";
-import { Search, Check, ArrowRight, Plus, LayoutGrid, List, BarChart3, ChevronRight } from "lucide-react";
+import { Search, Check, X, ArrowRight, Plus, LayoutGrid, List, BarChart3, ChevronRight } from "lucide-react";
+import { getSmartSummary } from "./utils/teamSummaries";
 
 type TeamPreview = {
   id: string;
   team_name: string | null;
   email: string | null;
   submitted_at: string | null;
+  problem_statement_short?: string | null;
+  team_members?: string | null;
+  isEvaluated?: boolean;
 };
 
 export default function Home() {
@@ -28,18 +32,30 @@ export default function Home() {
       setLoading(true);
       setError(null);
       try {
-        // Fetch teams from idealens_submissions2
-        const { data, error: subError } = await supabase
-          .from("idealens_submissions2")
-          .select("id, submitted_at, email, team_name")
-          .order("submitted_at", { ascending: false });
+        // Fetch teams and evaluation status in parallel
+        const [ { data, error: subError }, { data: evalsData } ] = await Promise.all([
+          supabase
+            .from("idealens_submissions2")
+            .select("id, submitted_at, email, team_name, problem_statement_short, team_members")
+            .order("submitted_at", { ascending: false }),
+          supabase
+            .from("human_evaluations")
+            .select("idea_id")
+        ]);
 
         if (subError) {
           console.error("Supabase Error fetching teams:", subError);
           throw subError;
         }
 
-        setTeams(data as TeamPreview[]);
+        const evaluatedIds = new Set((evalsData || []).map((e: any) => String(e.idea_id)));
+        
+        const teamsWithStatus = (data as any[]).map(t => ({
+          ...t,
+          isEvaluated: evaluatedIds.has(String(t.id))
+        }));
+
+        setTeams(teamsWithStatus as TeamPreview[]);
       } catch (err: any) {
         console.error("Dashboard Intelligence Error:", err);
         setError(`Failed to load intelligence: ${err.message || String(err)}`);
@@ -72,9 +88,12 @@ export default function Home() {
   }, [teams]);
 
   const processedTeams = useMemo(() => {
-    let result = teams.filter((team) =>
-      (team.team_name || "").toLowerCase().includes(query.toLowerCase())
-    );
+    let result = teams.filter((team) => {
+      const q = query.toLowerCase();
+      const matchName = (team.team_name || "").toLowerCase().includes(q);
+      const matchMembers = (team.team_members || "").toLowerCase().includes(q);
+      return matchName || matchMembers;
+    });
 
     if (sortBy === 'name') {
       result = [...result].sort((a, b) => (a.team_name || "").localeCompare(b.team_name || ""));
@@ -131,6 +150,20 @@ export default function Home() {
                 href={`/idea/team?id=${encodeURIComponent(team.id)}`}
                 className="group bg-white rounded-[14px] border border-slate-100 p-2.5 shadow-sm hover:shadow-xl hover:scale-[1.03] transition-all flex flex-col items-center text-center gap-2 relative overflow-hidden h-40 w-full"
               >
+                {team.isEvaluated ? (
+                    <div className="absolute bottom-3 right-3 flex items-center justify-center z-10" title="Evaluated">
+                        <svg fill="currentColor" viewBox="0 0 100 100" className="w-[14px] h-[14px] text-green-500 drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.5)]">
+                          <polygon points="35,85 10,60 20,50 35,65 80,15 90,25" />
+                        </svg>
+                    </div>
+                ) : (
+                    <div className="absolute bottom-3 right-3 flex items-center justify-center z-10" title="Not Evaluated">
+                        <svg fill="currentColor" viewBox="0 0 100 100" className="w-[14px] h-[14px] text-rose-500 drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.5)]">
+                          <polygon points="80,30 70,20 50,40 30,20 20,30 40,50 20,70 30,80 50,60 70,80 80,70 60,50" />
+                        </svg>
+                    </div>
+                )}
+                
                 {/* Visual Accent */}
                 <div className="absolute top-0 left-0 w-full h-0.5 bg-brand-accent/5 group-hover:bg-brand-accent transition-colors"></div>
 
@@ -156,14 +189,19 @@ export default function Home() {
                   </span>
                 </div>
 
-                <div className="flex flex-col items-center gap-0">
-                  <h3 className="text-[9px] font-black text-slate-900 uppercase italic group-hover:text-brand-accent transition-colors tracking-tight leading-snug line-clamp-2 px-1">
+                <div className="flex flex-col items-center gap-0.5 w-full px-2 min-w-0 max-w-full flex-1">
+                  <h3 className="text-[9px] font-black text-slate-900 uppercase italic group-hover:text-brand-accent transition-colors tracking-tight leading-snug line-clamp-2 text-center w-full">
                     {team.team_name || "Untitled"}
                   </h3>
                   {team.submitted_at && (
                     <span className="text-[6px] font-bold text-slate-400 uppercase tracking-widest italic opacity-40">
                       ID: {team.id.slice(0, 4)}
                     </span>
+                  )}
+                  {team.problem_statement_short && (
+                    <p className="text-[8px] font-medium text-slate-600 truncate w-full max-w-full text-center mt-1">
+                      {getSmartSummary(team.id, team.problem_statement_short)}
+                    </p>
                   )}
                 </div>
 
